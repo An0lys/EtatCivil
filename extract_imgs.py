@@ -29,7 +29,7 @@ os.makedirs(data_dir, exist_ok=True)
 # Main loop
 browser = Browser('chrome')
 img_urls = []
-for i in range(198401, 198401+200):
+for i in range(257583, 257583+200):
     to_encode = 'a:4:{s:4:"date";s:10:"2025-03-26";s:10:"type_fonds";s:11:"arko_seriel";s:4:"ref1";i:4;s:4:"ref2";i:'+str(i)+';}'
     url = "https://archives.paris.fr/arkotheque/arkotheque_visionneuse_archives.php?arko=" + base64.b64encode(to_encode.encode()).decode('utf-8')
     print("Scraping from", url)
