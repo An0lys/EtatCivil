@@ -1,8 +1,8 @@
 
-French Archives - v1 2025-04-01 12:55pm
+French Archives - v3 2025-04-01 1:48pm
 ==============================
 
-This dataset was exported via roboflow.com on April 1, 2025 at 10:56 AM GMT
+This dataset was exported via roboflow.com on April 1, 2025 at 11:49 AM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -21,6 +21,7 @@ The dataset includes 30 images.
 French-Archives are annotated in YOLOv11 format.
 
 The following pre-processing was applied to each image:
+* Resize to 2048x1472 (Stretch)
 
 No image augmentation techniques were applied.
 
