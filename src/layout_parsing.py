@@ -4,6 +4,48 @@ import cv2
 import os
 import json
 
+def find_topmost_and_bottommost(persons):
+    """Find topmost and bottommost persons on the left and right sides."""
+    topmost_left, topmost_left_coordinates, topmost_left_index = None, None, None
+    topmost_right, topmost_right_coordinates, topmost_right_index = None, None, None
+    bottommost_left, bottommost_left_coordinates, bottommost_left_index = None, None, None
+
+    for idx, person_boxes in enumerate(persons):
+        for box in person_boxes:
+            if box["side"] == "right":
+                if topmost_right is None or box["coordinates"][1] < topmost_right_coordinates[1]:
+                    topmost_right, topmost_right_coordinates, topmost_right_index = person_boxes, box["coordinates"], idx
+            elif box["side"] == "left":
+                if bottommost_left is None or box["coordinates"][3] > bottommost_left_coordinates[3]:
+                    bottommost_left, bottommost_left_coordinates, bottommost_left_index = person_boxes, box["coordinates"], idx
+                elif topmost_left is None or box["coordinates"][1] < topmost_left_coordinates[1]:
+                    topmost_left, topmost_left_coordinates, topmost_left_index = person_boxes, box["coordinates"], idx
+
+    return topmost_left, topmost_left_index, topmost_right, topmost_right_index, bottommost_left, bottommost_left_index
+
+def validate_nom_presence(topmost, class_id):
+    """Check if a 'nom' class exists in the topmost boxes."""
+    for box in topmost:
+        if box["class"] == class_id:
+            return True
+    return False
+
+def save_json_data(output_path, data):
+    """Save data to a JSON file."""
+    with open(output_path, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def annotate_and_save_image(output_path, annotated_image, persons):
+    """Annotate and save the image with bounding boxes."""
+    for person_id, person_boxes in enumerate(persons):
+        for box in person_boxes:
+            x1, y1, x2, y2 = map(int, box["coordinates"])
+            color = (0, 255, 0)  # Green color for bounding boxes
+            cv2.rectangle(annotated_image, (x1, y1), (x2, y2), color, 2)
+            label = f"Person {person_id}"
+            cv2.putText(annotated_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    cv2.imwrite(output_path, annotated_image)
+
 def process_images(input_dir='../data/raw', output_dir='../data/processed', model_path='../layout/detect/train/weights/best.pt'):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -49,35 +91,30 @@ def process_images(input_dir='../data/raw', output_dir='../data/processed', mode
                     person_boxes.append(box2)
             persons.append(person_boxes)
 
+        # Find topmost and bottommost persons
+        topmost_left, topmost_left_index, topmost_right, topmost_right_index, bottommost_left, bottommost_left_index = find_topmost_and_bottommost(persons)
+
+        # Merge or remove persons based on 'nom' presence
+        if not validate_nom_presence(topmost_right, 1): 
+            persons[bottommost_left_index] = persons[bottommost_left_index] + topmost_right
+            persons[topmost_right_index] = []
+
+        if not validate_nom_presence(topmost_left, 1): 
+            persons[topmost_left_index] = []
+        
+        persons = [person_boxes for person_boxes in persons if person_boxes]  # Remove empty lists
+
+        # Ensure output directories exist
         os.makedirs(output_dir+'/sign', exist_ok=True)
         os.makedirs(output_dir+'/pers', exist_ok=True)
         os.makedirs(output_dir+'/rslt', exist_ok=True)
 
-        output_signature_path = os.path.join(output_dir, 'sign', filename.replace('.jpg', '.json').replace('.png', '.json'))
-        output_persons_path = os.path.join(output_dir, 'pers', filename.replace('.jpg', '.json').replace('.png', '.json'))
+        # Save signature and persons data to JSON
+        save_json_data(os.path.join(output_dir, 'sign', filename.replace('.jpg', '.json').replace('.png', '.json')), signature_boxes)
+        save_json_data(os.path.join(output_dir, 'pers', filename.replace('.jpg', '.json').replace('.png', '.json')), persons)
 
-        # Save the bounding box data to JSON files
-        with open(output_signature_path, 'w') as f:
-            json.dump(signature_boxes, f, indent=4)
-        
-        with open(output_persons_path, 'w') as f:
-            json.dump(persons, f, indent=4)
-
-        output_path = os.path.join(output_dir+'/rslt', filename)
-        # Draw bounding boxes for each person and save the image
-        for person_id, person_boxes in enumerate(persons):
-            for box in person_boxes:
-                x1, y1, x2, y2 = map(int, box["coordinates"])
-                color = (0, 255, 0)  # Green color for bounding boxes
-                cv2.rectangle(annotated_image, (x1, y1), (x2, y2), color, 2)
-
-                # Put the person ID label
-                label = f"Person {person_id}"
-                cv2.putText(annotated_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-        # Save the annotated image
-        cv2.imwrite(output_path, annotated_image)
-
+        # Annotate and save the image
+        annotate_and_save_image(os.path.join(output_dir+'/rslt', filename), annotated_image, persons)
 
 def overlapping_height(box1, box2):
 
