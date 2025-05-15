@@ -46,6 +46,46 @@ def annotate_and_save_image(output_path, annotated_image, persons):
             cv2.putText(annotated_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     cv2.imwrite(output_path, annotated_image)
 
+def overlapping_height(box1, box2):
+    """Calculate the overlapping height between two bounding boxes."""
+    # Unpack the coordinates
+    x1_1, y1_1, x2_1, y2_1 = box1
+    x1_2, y1_2, x2_2, y2_2 = box2
+
+    # Calculate the overlapping height
+    overlap_y = max(0, min(y2_1, y2_2) - max(y1_1, y1_2))
+    min_height = min(y2_1 - y1_1, y2_2 - y1_2)
+
+    return overlap_y/min_height
+
+def overlapping_width(box1, box2):
+    """Calculate the overlapping width between two bounding boxes."""
+    # Unpack the coordinates
+    x1_1, y1_1, x2_1, y2_1 = box1
+    x1_2, y1_2, x2_2, y2_2 = box2
+
+    # Calculate the overlapping width
+    overlap_x = max(0, min(x2_1, x2_2) - max(x1_1, x1_2))
+    min_width = min(x2_1 - x1_1, x2_2 - x1_2)
+
+    return overlap_x/min_width
+
+def check_side(box,image_width):
+    """Check if the bounding box is on the left or right side of the image."""
+    # Unpack the coordinates
+    x1, y1, x2, y2 = box
+
+    # Calculate the center of the box
+    center_x = (x1 + x2) / 2
+
+    # Check if the box is on the left or right side of the image
+    if center_x < 0.5*image_width:
+        side = "left"
+    else:
+        side = "right"
+
+    return side
+
 def process_images(input_dir='../data/raw', output_dir='../data/processed', model_path='../layout/detect/train/weights/best.pt'):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -115,45 +155,6 @@ def process_images(input_dir='../data/raw', output_dir='../data/processed', mode
 
         # Annotate and save the image
         annotate_and_save_image(os.path.join(output_dir+'/rslt', filename), annotated_image, persons)
-
-def overlapping_height(box1, box2):
-
-    # Unpack the coordinates
-    x1_1, y1_1, x2_1, y2_1 = box1
-    x1_2, y1_2, x2_2, y2_2 = box2
-
-    # Calculate the overlapping height
-    overlap_y = max(0, min(y2_1, y2_2) - max(y1_1, y1_2))
-    min_height = min(y2_1 - y1_1, y2_2 - y1_2)
-
-    return overlap_y/min_height
-
-def overlapping_width(box1, box2):
-
-    # Unpack the coordinates
-    x1_1, y1_1, x2_1, y2_1 = box1
-    x1_2, y1_2, x2_2, y2_2 = box2
-
-    # Calculate the overlapping width
-    overlap_x = max(0, min(x2_1, x2_2) - max(x1_1, x1_2))
-    min_width = min(x2_1 - x1_1, x2_2 - x1_2)
-
-    return overlap_x/min_width
-
-def check_side(box,image_width):
-    # Unpack the coordinates
-    x1, y1, x2, y2 = box
-
-    # Calculate the center of the box
-    center_x = (x1 + x2) / 2
-
-    # Check if the box is on the left or right side of the image
-    if center_x < 0.5*image_width:
-        side = "left"
-    else:
-        side = "right"
-
-    return side
 
 if __name__ == "__main__":
     # Process all images in the raw directory and save to processed directory
