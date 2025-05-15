@@ -5,7 +5,7 @@
 The Etat Civil project is designed to digitize and process historical civil records from archives. By leveraging modern techniques such as web scraping, image processing, and OCR, this pipeline transforms scanned documents into structured datasets for further analysis.
 
 ## Overview of Pipeline Components
-![pipeline](pipeline.png)
+![pipeline](readme_img/pipeline.png)
 
 The pipeline, depicted in the image above, encompasses four fundamental stages:
 
@@ -61,7 +61,7 @@ The layout parsing stage is crucial for segmenting the global images into smalle
 
 Roboflow is utilized to streamline the image annotation process. It provides tools to label and prepare datasets for training object detection models, such as YOLO.
 
-![alt text](roboflow.png)
+![alt text](readme_img/roboflow.png)
 
 Roboflow provides a centralized workspace where all group members can access and contribute to the annotation process, ensuring that everyone works on the same dataset and avoiding duplication of effort. Changes made by one member are immediately reflected in the shared workspace, enabling real-time collaboration. With role-based access control, the project owner can assign specific roles, such as annotator or reviewer, to team members, streamlining the workflow. Additionally, Roboflow maintains version history for datasets, making it easy to track changes and revert to previous versions if needed.
 
@@ -74,7 +74,7 @@ After preparing the dataset, the YOLO model is trained using the downloaded data
 Once the training is complete, the model is evaluated on the validation dataset to assess its performance. The evaluation is performed using the command `!yolo detect predict model=/content/runs/detect/train5/weights/best.pt source=/content/French-Archives-1/test/images`, which applies the trained model to the test images and generates predictions. The trained YOLO model is then used in the layout parsing stage to detect and classify bounding boxes for text lines, signatures, and other elements in the images.
 
 The result of the Layout parsing process:
-![](layout/detect/predict/0bd8b00f99_jpg.rf.63bc68cd5889de8cdb50e06d298f91dc.jpg)
+![](readme_img/0bd8b00f99_jpg.rf.63bc68cd5889de8cdb50e06d298f91dc.jpg)
 
 ## Group by person
 
@@ -121,7 +121,7 @@ save_json_data(os.path.join(output_dir, 'pers', filename.replace('.jpg', '.json'
 This stage transforms raw bounding box data into a structured format, enabling the creation of a final dataset that groups all relevant information by person.
 
 The result of the grouping stage:
-![](data/processed/rslt/5e47e8de05.jpg)
+![](readme_img/5e47e8de05.jpg)
 
 ## Optical Character Recognition (OCR) Module
 
