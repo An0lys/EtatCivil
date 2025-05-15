@@ -129,9 +129,13 @@ The Optical Character Recognition (OCR) module is the final stage of the pipelin
 
 Currently, this part of the pipeline is not fully implemented due to the difficulty in finding pre-trained OCR models specifically designed for French manuscripts. Most available OCR models are trained on modern printed text or non-French languages, making them unsuitable for accurately recognizing historical French handwriting.
 
-To address this challenge, we plan to manually train an OCR model using a dataset of annotated French manuscripts. This involves collecting a sufficient number of labeled samples, preprocessing the data, and training the model using frameworks such as Tesseract or PyTorch-based OCR libraries. The manual training process will ensure that the model is tailored to the unique characteristics of historical French handwriting, improving its accuracy and reliability.
+To address the challenges of transcribing historical French manuscripts, we experimented with various existing OCR models to evaluate their suitability for this task. Initially, we tested Tesseract, a widely used open-source OCR tool. While it performed adequately on modern printed text, it struggled with the unique handwriting styles and faded text often found in archival documents. We then explored cloud-based solutions such as Google Vision OCR and AWS Textract. These tools demonstrated strong performance on structured and modern documents but failed to handle the irregularities and complexities of historical French handwriting.
 
-Until the model is trained, the OCR module remains incomplete, and manual transcription may be required for certain datasets.
+Next, we tried EasyOCR, a lightweight OCR library, which showed some promise for certain handwriting styles but lacked robustness for the diverse dataset. Kraken OCR, designed specifically for historical documents, provided better results compared to other models. However, it still required significant fine-tuning and training on a custom dataset to achieve acceptable accuracy for our use case.
+
+Despite these efforts, none of the existing models met the accuracy requirements for historical French manuscripts. As a result, we plan to manually train a custom OCR model tailored to this dataset. This involves collecting a sufficient number of labeled samples, preprocessing the data, and training the model using frameworks such as Tesseract's training tools or PyTorch-based OCR libraries. This custom approach will ensure the model is optimized for the unique characteristics of historical French handwriting, significantly improving its reliability and accuracy.
+
+Until the custom model is ready, manual transcription remains a fallback option for datasets with highly degraded or complex handwriting.
 
 ## Conclusion
 
